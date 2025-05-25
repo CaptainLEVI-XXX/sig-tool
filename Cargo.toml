@@ -1,0 +1,27 @@
+[package]
+name = "sig-tool"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+#CLI
+clap = { version = "4.5.38", features = ["derive"] }
+
+
+# Cryptography
+blst = "0.3.14"
+k256 = {version = "0.13.4", features = ["ecdsa"]}
+sha2 = "0.10.9"
+rand = "0.9.1"
+
+
+# Serialization and encoding
+serde = "1.0.219"
+serde_json = {version = "1.0" , feature = ["derive"]}
+base64 = "0.22.1"
+hex = "0.4.3"
+
+
+# Error handling
+thiserror = "2.0.12"
