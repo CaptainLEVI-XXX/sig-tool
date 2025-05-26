@@ -1,20 +1,44 @@
+# Crypto CLI Commands
+
+## Generate Keys
+
 ### Generate a ECDSA key 
-```cargo run -- keygen --name my-ecdsa-key --scheme ecdsa```
+```bash
+cargo run -- keygen --name my-ecdsa-key --scheme ecdsa
+```
 
 ### Generate a BLS key 
-```cargo run -- keygen --name my-bls-key --scheme bls```
+```bash
+cargo run -- keygen --name my-bls-key --scheme bls
+```
+
+## List Keys
 
 ### List all keys
-```cargo run -- list-keys```
+```bash
+cargo run -- list-keys
+```
+
+## Signing Messages
 
 ### Sign a message with ECDSA
-```cargo run -- sign --key my-ecdsa-key --message 'Hello, world!' --output ecdsa-signature.sig```
-
-### Verify the ECDSA signature
-```cargo run -- verify --key my-ecdsa-key --signature ecdsa-signature.sig --message 'Hello, world!'```
+```bash
+cargo run -- sign --key my-ecdsa-key --message 'Hello, world!' --output ecdsa-signature.sig
+```
 
 ### Sign with BLS
-```cargo run -- sign --key my-bls-key --message 'Hello, world!' --output bls-signature.sig```
+```bash
+cargo run -- sign --key my-bls-key --message 'Hello, world!' --output bls-signature.sig
+```
+
+## Verifying Signatures
+
+### Verify the ECDSA signature
+```bash
+cargo run -- verify --key my-ecdsa-key --signature ecdsa-signature.sig --message 'Hello, world!'
+```
 
 ### Verify BLS signature
-```cargo run -- verify --key my-bls-key --signature bls-signature.sig --message 'Hello, world!'```
+```bash
+cargo run -- verify --key my-bls-key --signature bls-signature.sig --message 'Hello, world!'
+```
