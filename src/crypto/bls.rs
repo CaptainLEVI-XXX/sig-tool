@@ -1,7 +1,6 @@
 use crate::crypto::scheme::{SignatureScheme, SignatureError};
 use blst::{min_pk::*, BLST_ERROR};
 use rand::{rngs::OsRng, RngCore};
-use std::convert::TryFrom;
 
 #[derive(Debug)]
 pub struct BLS;
@@ -19,12 +18,23 @@ pub struct BLSSignature(Signature);
 // Implement aggregation for BLS signatures (not part of the trait)
 impl BLSSignature {
     pub fn aggregate(signatures: &[BLSSignature]) -> Result<Self, SignatureError> {
-        let sigs: Vec<&Signature> = signatures.iter().map(|s| &s.0).collect();
-        
-        match Signature::aggregate(&sigs[..], false) {
-            Ok(agg_sig) => Ok(BLSSignature(agg_sig)),
-            Err(_) => Err(SignatureError::Signing("Failed to aggregate signatures".into())),
+        if signatures.is_empty() {
+            return Err(SignatureError::Signing("Cannot aggregate empty signature list".into()));
         }
+        
+        // Start with the first signature and build an aggregate
+        let first_sig = &signatures[0].0;
+        let mut agg = AggregateSignature::from_signature(first_sig);
+        
+        // Add the remaining signatures
+        for sig in &signatures[1..] {
+            agg.add_signature(&sig.0, false)
+                .map_err(|_| SignatureError::Signing("Failed to add signature to aggregate".into()))?;
+        }
+        
+        // Convert to final signature
+        let final_sig = agg.to_signature();
+        Ok(BLSSignature(final_sig))
     }
 }
 
@@ -71,9 +81,7 @@ impl SignatureScheme for BLS {
     
     // Serialization methods for BLS keys and signatures
     fn serialize_private_key(private_key: &Self::PrivateKey) -> Result<Vec<u8>, SignatureError> {
-        let mut bytes = Vec::new();
-        private_key.0.serialize(&mut bytes);
-        Ok(bytes)
+        Ok(private_key.0.serialize().to_vec())
     }
     
     fn deserialize_private_key(bytes: &[u8]) -> Result<Self::PrivateKey, SignatureError> {
@@ -84,9 +92,7 @@ impl SignatureScheme for BLS {
     }
     
     fn serialize_public_key(public_key: &Self::PublicKey) -> Result<Vec<u8>, SignatureError> {
-        let mut bytes = Vec::new();
-        public_key.0.serialize(&mut bytes);
-        Ok(bytes)
+        Ok(public_key.0.serialize().to_vec())
     }
     
     fn deserialize_public_key(bytes: &[u8]) -> Result<Self::PublicKey, SignatureError> {
@@ -97,9 +103,7 @@ impl SignatureScheme for BLS {
     }
     
     fn serialize_signature(signature: &Self::Signature) -> Result<Vec<u8>, SignatureError> {
-        let mut bytes = Vec::new();
-        signature.0.serialize(&mut bytes);
-        Ok(bytes)
+        Ok(signature.0.serialize().to_vec())
     }
     
     fn deserialize_signature(bytes: &[u8]) -> Result<Self::Signature, SignatureError> {

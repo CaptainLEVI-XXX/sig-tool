@@ -5,7 +5,7 @@ use std::fmt::Debug;
 pub enum SignatureError{
     
     #[error("Key Generation Error: {0}")]
-    KeyGenration(String),
+    KeyGeneration(String),
     
     #[error("Signing Error :{0}")]
     Signing(String),
@@ -17,7 +17,13 @@ pub enum SignatureError{
     Serialization(String),
 
     #[error("Deserialization Error: {0}")]
-    Deserialization(String)
+    Deserialization(String),
+        
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+    
+    #[error("JSON error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
 pub trait SignatureScheme : Send + Sync + Debug{
@@ -26,13 +32,13 @@ pub trait SignatureScheme : Send + Sync + Debug{
     type PublicKey: Clone + Send + Sync;
     type Signature: Clone + Send + Sync;
 
-    fn name() -> &'static String;
+    fn name() -> &'static str;
 
     fn generate_keypair()->Result<(Self::PrivateKey,Self::PublicKey),SignatureError>;
 
     fn sign(private_key: &Self::PrivateKey,message: &[u8] )-> Result<Self::Signature,SignatureError>;
 
-    fn verify(public_key: &Self::PublicKey, message: &[u8])-> Result<bool,SignatureError>;
+    fn verify(public_key: &Self::PublicKey, message: &[u8],signature:&Self::Signature)->Result<bool,SignatureError>;
 
     //serialization
 
@@ -48,7 +54,7 @@ pub trait SignatureScheme : Send + Sync + Debug{
 
     fn deserialize_public_key(message: &[u8])->Result<Self::PublicKey,SignatureError>;
 
-    fn deserialize_public_key(message: &[u8])->Result<Self::Signature,SignatureError>;
+    fn deserialize_signature(message: &[u8])->Result<Self::Signature,SignatureError>;
 }
 
 
