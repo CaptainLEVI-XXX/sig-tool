@@ -16,7 +16,6 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Generate a new key pair
     #[clap(name = "keygen")]
     KeyGen {
         /// Name to identify the key
